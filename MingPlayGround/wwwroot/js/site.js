@@ -2,3 +2,9 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
+$(document).ready(function () {
+    // Toggle checkbox div visibility on button click
+    $("#toggleCheckboxDiv").click(function () {
+        $("#checkboxDiv").slideToggle();
+    });
+});

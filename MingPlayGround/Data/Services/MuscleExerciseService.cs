@@ -77,5 +77,12 @@ namespace MingPlayGround.Data.Services
                 }
             }
         }
+
+        public async Task<List<string>> GetTargetMuscleGroupsName(int id)
+            => await _context.MuscleGroups_Exercices
+                    .Include(me => me.MuscleGroup)
+                    .Where(me => me.ExerciceId.Equals(id))
+                    .Select(me => me.MuscleGroup.Name)
+                    .ToListAsync();
     }
 }

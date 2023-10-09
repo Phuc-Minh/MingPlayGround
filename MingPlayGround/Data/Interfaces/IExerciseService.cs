@@ -9,5 +9,6 @@ namespace MingPlayGround.Data.Interfaces
         Task CreateExerciseAsync(Exercice exercice);
         Task UpdateExerciseAsync(Exercice exercice);
         Task DeleteExerciseAsync(int id);
+        bool ExerciceExists(int id);
     }
 }

@@ -4,6 +4,7 @@ namespace MingPlayGround.Data.Interfaces
 {
     public interface IMuscleGroupService
     {
-        public Task<MuscleGroup?> GetMuscleGroupByName(string MuscleName);
+        Task<MuscleGroup?> GetMuscleGroupByName(string MuscleName);
+        Task<List<string>> GetAllMuscleGroupsName();
     }
 }

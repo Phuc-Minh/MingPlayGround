@@ -44,5 +44,8 @@ namespace MingPlayGround.Data.Services
                 await _context.SaveChangesAsync();
             }
         }
+
+        public bool ExerciceExists(int id)
+            => (_context.Exercices?.Any(e => e.Id == id)).GetValueOrDefault();
     }
 }

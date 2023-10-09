@@ -16,15 +16,15 @@ namespace MingPlayGround.Controllers
 {
     public class ExercicesController : Controller
     {
-        private readonly AppDbContext _context;
         private readonly IExerciseService _exerciseService;
+        private readonly IMuscleGroupService _muscleGroupService;
         private readonly IMuscleExerciseService _muscleExerciseService;
 
 
-        public ExercicesController(AppDbContext context, IExerciseService exerciceService, IMuscleExerciseService muscleExerciseService)
+        public ExercicesController(IExerciseService exerciceService, IMuscleGroupService muscleGroupService, IMuscleExerciseService muscleExerciseService)
         {
-            _context = context;
             _exerciseService = exerciceService;
+            _muscleGroupService = muscleGroupService;
             _muscleExerciseService = muscleExerciseService;
         }
 
@@ -100,7 +100,7 @@ namespace MingPlayGround.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ExerciceExists(exercice.Id)) 
+                    if (!_exerciseService.ExerciceExists(exercice.Id)) 
                         return NotFound();
                     else
                         throw;
@@ -136,23 +136,14 @@ namespace MingPlayGround.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ExerciceExists(int id)
-        {
-          return (_context.Exercices?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
-
         private async Task GetMuscleGroups()
-            => ViewBag.MuscleGroupNames = await _context.MuscleGroups.Select(item => item.Name).ToListAsync();
+            => ViewBag.MuscleGroupNames = await _muscleGroupService.GetAllMuscleGroupsName();
         
         private void GetExerciceTypes()
             => ViewBag.ExerciseType = GetEnumSelectList<MingPlayGround.Data.Enums.ExerciceType>();
 
-        private async Task GetTargetMuscleGroups(int? id)
-            => ViewBag.TargetMuscleGroups = await _context.MuscleGroups_Exercices
-                                                          .Include(me => me.MuscleGroup)
-                                                          .Where(me => me.ExerciceId.Equals(id))
-                                                          .Select(me => me.MuscleGroup.Name)
-                                                          .ToListAsync();
+        private async Task GetTargetMuscleGroups(int id)
+            => ViewBag.TargetMuscleGroups = await _muscleExerciseService.GetTargetMuscleGroupsName(id);
 
         public static List<SelectListItem> GetEnumSelectList<TEnum>() where TEnum : Enum
         {

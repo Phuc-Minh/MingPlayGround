@@ -6,37 +6,36 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MingPlayGround.Data;
+using MingPlayGround.Data.Interfaces;
+using MingPlayGround.Data.Services;
 using MingPlayGround.Models;
 
 namespace MingPlayGround.Controllers
 {
     public class MuscleGroupsController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly IMuscleGroupService _muscleGroupService;
 
-        public MuscleGroupsController(AppDbContext context)
+        public MuscleGroupsController(IMuscleGroupService muscleGroupService)
         {
-            _context = context;
+            _muscleGroupService = muscleGroupService;
         }
 
         // GET: MuscleGroups
         public async Task<IActionResult> Index()
         {
-              return _context.MuscleGroups != null ? 
-                          View(await _context.MuscleGroups.ToListAsync()) :
-                          Problem("Entity set 'AppDbContext.MuscleGroups'  is null.");
+              return _muscleGroupService != null ? 
+                          View(await _muscleGroupService.GetAllMuscleGroups()) :
+                          Problem("Entity set '_muscleGroupService'  is null.");
         }
 
         // GET: MuscleGroups/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null || _context.MuscleGroups == null)
-            {
+            if (_muscleGroupService == null)
                 return NotFound();
-            }
 
-            var muscleGroup = await _context.MuscleGroups
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var muscleGroup = await _muscleGroupService.GetMuscleGroupById(id);
             if (muscleGroup == null)
             {
                 return NotFound();
@@ -47,9 +46,7 @@ namespace MingPlayGround.Controllers
 
         // GET: MuscleGroups/Create
         public IActionResult Create()
-        {
-            return View();
-        }
+            => View();
 
         // POST: MuscleGroups/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -60,26 +57,22 @@ namespace MingPlayGround.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(muscleGroup);
-                await _context.SaveChangesAsync();
+                await  _muscleGroupService.CreateMuscleAsync(muscleGroup);
                 return RedirectToAction(nameof(Index));
             }
             return View(muscleGroup);
         }
 
         // GET: MuscleGroups/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null || _context.MuscleGroups == null)
-            {
+            if (_muscleGroupService == null)
                 return NotFound();
-            }
 
-            var muscleGroup = await _context.MuscleGroups.FindAsync(id);
+            var muscleGroup = await _muscleGroupService.GetMuscleGroupById(id);
             if (muscleGroup == null)
-            {
                 return NotFound();
-            }
+
             return View(muscleGroup);
         }
 
@@ -91,27 +84,21 @@ namespace MingPlayGround.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] MuscleGroup muscleGroup)
         {
             if (id != muscleGroup.Id)
-            {
                 return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(muscleGroup);
-                    await _context.SaveChangesAsync();
+                    await _muscleGroupService.UpdateMuscleAsync(muscleGroup);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!MuscleGroupExists(muscleGroup.Id))
-                    {
+                    if (!_muscleGroupService.MuscleGroupExists(muscleGroup.Id))
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
+                    
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -119,19 +106,15 @@ namespace MingPlayGround.Controllers
         }
 
         // GET: MuscleGroups/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null || _context.MuscleGroups == null)
-            {
+            if (_muscleGroupService == null)
                 return NotFound();
-            }
 
-            var muscleGroup = await _context.MuscleGroups
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var muscleGroup = await _muscleGroupService.GetMuscleGroupById(id);
+
             if (muscleGroup == null)
-            {
                 return NotFound();
-            }
 
             return View(muscleGroup);
         }
@@ -141,23 +124,12 @@ namespace MingPlayGround.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.MuscleGroups == null)
-            {
-                return Problem("Entity set 'AppDbContext.MuscleGroups'  is null.");
-            }
-            var muscleGroup = await _context.MuscleGroups.FindAsync(id);
-            if (muscleGroup != null)
-            {
-                _context.MuscleGroups.Remove(muscleGroup);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+            if (_muscleGroupService == null)
+                return Problem("Entity set '_muscleGroupService'  is null.");
 
-        private bool MuscleGroupExists(int id)
-        {
-          return (_context.MuscleGroups?.Any(e => e.Id == id)).GetValueOrDefault();
+            await _muscleGroupService.DeleteMuscleAsync(id);
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

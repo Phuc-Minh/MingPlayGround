@@ -14,14 +14,14 @@ using Utility = MingPlayGround.Utilities.Utility;
 
 namespace MingPlayGround.Controllers
 {
-    public class ExercicesController : Controller
+    public class ExercisesController : Controller
     {
         private readonly IExerciseService _exerciseService;
         private readonly IMuscleGroupService _muscleGroupService;
         private readonly IMuscleExerciseService _muscleExerciseService;
 
 
-        public ExercicesController(IExerciseService exerciceService, IMuscleGroupService muscleGroupService, IMuscleExerciseService muscleExerciseService)
+        public ExercisesController(IExerciseService exerciceService, IMuscleGroupService muscleGroupService, IMuscleExerciseService muscleExerciseService)
         {
             _exerciseService = exerciceService;
             _muscleGroupService = muscleGroupService;
@@ -128,10 +128,10 @@ namespace MingPlayGround.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var exercice = await _exerciseService.GetExerciseByIdAsync(id);
+            if (_exerciseService == null)
+                return Problem("Entity set '_exerciseService'  is null.");
 
-            if (exercice != null)
-               await _exerciseService.DeleteExerciseAsync(id);
+            await _exerciseService.DeleteExerciseAsync(id);
             
             return RedirectToAction(nameof(Index));
         }
